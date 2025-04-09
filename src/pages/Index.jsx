@@ -79,7 +79,8 @@ const Index = () => {
         return;
       }
       if (data.length == 0) {
-        setErrorLog(`RFID "${currentInput}" not found.`);
+        //setErrorLog(`RFID "${currentInput}" not found.`);
+        navigate("/rfid_link", { state: {"rfid": currentInput} });
       } else {
         fetchStudent(false, data[0]["student_id"]);
       }
