@@ -156,8 +156,10 @@ const Index = () => {
                   }
                 }}
             />
-            <div className="flex flex-row pt-6">
-              <label className="text-sm font-medium text-gray-100 self-center pr-8">Attendance Type</label>
+            <div className="pt-4">
+              <label className="text-sm font-medium text-gray-100 self-center">Attendance Type</label>
+            </div>
+            <div className="flex flex-row pt-4">
               <Button type="button" onClick={() => { setClockIn(true) }} selected={clockIn}>IN</Button>
               <Button type="button" onClick={() => { setClockIn(false) }} selected={!clockIn}>OUT</Button>
               <div className="flex-grow"></div>
