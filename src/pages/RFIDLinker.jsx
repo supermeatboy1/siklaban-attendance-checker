@@ -38,14 +38,31 @@ const RFIDLinker = () => {
 
     setLoadingModal("Linking your ID...");
 
-    const { error } = await supabase
-      .from('RfidToStudent')
-      .upsert({ student_id: studentId, rfid: location.state?.rfid });
-
-    setLoadingModal(null);
+    const { data, error } = await supabase
+      .from('Students')
+      .select("student_id, name")
+      .eq("student_id", studentId)
 
     if (error) {
       setErrorLog(error["code"] + " - " + error["message"]);
+      setLoadingModal(null);
+      return;
+    }
+    if (data.length == 0) {
+      setErrorLog(`Student with ID "${studentId}" not found.\r\nPlease manually record your attendance instead.`);
+      setLoadingModal(null);
+      return;
+    }
+
+    const response = await supabase
+      .from('RfidToStudent')
+      .upsert({ student_id: studentId, rfid: location.state?.rfid });
+    let error2 = response["error"]
+
+    setLoadingModal(null);
+
+    if (error2) {
+      setErrorLog(error2["code"] + " - " + error2["message"]);
     } else {
       setSuccessModal(true);
     }
