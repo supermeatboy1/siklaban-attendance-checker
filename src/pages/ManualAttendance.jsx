@@ -55,7 +55,7 @@ const ManualAttendance = () => {
 
   return (
     <>
-      <form className="flex flex-col" onSubmit={recordAttendance}>
+      <form className="flex flex-col h-screen" onSubmit={recordAttendance}>
         <div className="m-auto">
           <div className="w-5/8 m-auto">
             <img src={intramuralsWordmark} alt="Siklaban 2025 Wordmark" className="pt-10 pb-5" />

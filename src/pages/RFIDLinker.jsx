@@ -53,7 +53,7 @@ const RFIDLinker = () => {
 
   return (
     <>
-      <form className="flex flex-col" onSubmit={recordRfid}>
+      <form className="flex flex-col h-screen" onSubmit={recordRfid}>
         <div className="m-auto">
           <div className="w-5/8 m-auto">
             <img src={intramuralsWordmark} alt="Siklaban 2025 Wordmark" className="pt-10 pb-5" />

@@ -79,7 +79,6 @@ const Index = () => {
         return;
       }
       if (data.length == 0) {
-        //setErrorLog(`RFID "${currentInput}" not found.`);
         navigate("/rfid_link", { state: {"rfid": currentInput} });
       } else {
         fetchStudent(false, data[0]["student_id"]);
@@ -109,9 +108,18 @@ const Index = () => {
     }
   }
 
+  const submitInput = async () => {
+    console.log("Current input: " + idInput);
+    const currentIdInput = idInput;
+
+    setLoadingModal("Looking for student information...");
+    fetchStudent(useRFID, currentIdInput);
+    setIdInput("");
+  } 
+
   return (
     <>
-      <div className="flex flex-col">
+      <div className="flex flex-col h-screen">
         <div className="m-auto">
           <div className="w-5/8 m-auto">
             <img src={intramuralsWordmark} alt="Siklaban 2025 Wordmark" className="pt-10 pb-5" />
@@ -138,12 +146,7 @@ const Index = () => {
                 }}
                 onKeyDown={(e) => {
                   if (e.key == 'Enter') {
-                    console.log("Current input: " + idInput);
-                    const currentIdInput = idInput;
-
-                    setLoadingModal("Looking for student information...");
-                    fetchStudent(useRFID, currentIdInput);
-                    setIdInput("");
+                    submitInput();
                   } else if (useRFID) {
                     const diff = Date.now() - lastInputTime;
                     setLastInputTime(Date.now());
@@ -153,11 +156,13 @@ const Index = () => {
                   }
                 }}
             />
-          </div>
-          <div className="flex flex-row justify-center">
-            <label className="text-sm font-medium text-gray-100 self-center pr-8">Attendance Type</label>
-            <Button type="button" onClick={() => { setClockIn(true) }} selected={clockIn}>IN</Button>
-            <Button type="button" onClick={() => { setClockIn(false) }} selected={!clockIn}>OUT</Button>
+            <div className="flex flex-row pt-6">
+              <label className="text-sm font-medium text-gray-100 self-center pr-8">Attendance Type</label>
+              <Button type="button" onClick={() => { setClockIn(true) }} selected={clockIn}>IN</Button>
+              <Button type="button" onClick={() => { setClockIn(false) }} selected={!clockIn}>OUT</Button>
+              <div className="flex-grow"></div>
+              <Button type="button" onClick={submitInput} selected={true}>Record Attendance</Button>
+            </div>
           </div>
         </div>
       </div>
