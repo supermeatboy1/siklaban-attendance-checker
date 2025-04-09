@@ -3,29 +3,39 @@ import intramuralsWordmark from './assets/Wordmark.png'
 
 import Button from './components/Button.jsx';
 import ConfirmationModal from "./components/ConfirmationModal";
+import ErrorDialogModal from "./components/ErrorDialogModal";
+import LoadingModal from "./components/LoadingModal";
+import DialogModal from "./components/DialogModal";
 
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_NEXT_PUBLIC_SUPABASE_ANON_KEY)
 
 function App() {
+  const CLUSTERS = ["ATYCB - Ardor", "CHS - Fuego", "CAS - Incendio", "CEA - Lumbre", "CCIS - Stella"]
+
   const [clockIn, setClockIn] = useState(true)
   const [useRFID, setUseRFID] = useState(true)
   const [idInput, setIdInput] = useState("")
   const [lastInputTime, setLastInputTime] = useState(Date.now())
+  const [errorLog, setErrorLog] = useState(null);
+  const [idConfirm, setIdConfirm] = useState(null);
   const [idConfirmModal, setIdConfirmModal] = useState(false);
+  const [loadingModal, setLoadingModal] = useState(false);
+  const [successModal, setSuccessModal] = useState(false);
+  const [foundStudent, setFoundStudent] = useState("[ERROR]");
   const idInputRef = useRef(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (useRFID && document.activeElement != idInputRef.current && !idConfirmModal) {
+      if (useRFID && document.activeElement != idInputRef.current && idConfirm != null) {
         console.log("Bringing back the focus...")
         idInputRef.current?.focus();
       }
     }, 200);
 
     return () => clearInterval(interval);
-  }, [useRFID, idConfirmModal, idInputRef])
+  }, [useRFID, idConfirm, idInputRef])
 
   const fetchStudent = async (isRFID, currentInput) => {
     console.log(`isRFID: ${isRFID}, currentInput: ${currentInput}`)
@@ -35,9 +45,58 @@ function App() {
         .from('StudentsWithCluster')
         .select("student_id, name, cluster_name")
         .eq("student_id", currentInput)
-      console.log(data)
+
+      if (error) {
+        setErrorLog(error);
+        return;
+      }
+      if (data.length == 0) {
+        setErrorLog(`Student with ID "${currentInput}" not found.`);
+        return;
+      } else {
+        setIdConfirm(data[0]);
+        setIdConfirmModal(true);
+
+        console.log(data[0]);
+      }
+    } else {
+      const { data, error } = await supabase
+        .from('RfidToStudent')
+        .select("student_id, rfid")
+        .eq("rfid", currentInput)
+
+      if (error) {
+        setErrorLog(error);
+        return;
+      }
+      if (data.length == 0) {
+        setErrorLog(`RFID "${currentInput}" not found.`);
+      } else {
+        fetchStudent(false, data[0]["student_id"]);
+      }
     }
-    //setIdConfirmModal(true);
+  }
+
+  const recordAttendance = async (studentId) => {
+    const attendanceType = clockIn ? "IN" : "OUT";
+    console.log(`Recording ${attendanceType} attendance for ${studentId}`);
+
+    setIdConfirm(null);
+    setIdConfirmModal(false);
+
+    setLoadingModal(true);
+
+    const { error } = await supabase
+      .from('Attendance')
+      .insert({ student_id: studentId, attendance_type: attendanceType });
+
+    setLoadingModal(false);
+
+    if (error) {
+      setErrorLog(error);
+    } else {
+      setSuccessModal(true);
+    }
   }
 
   return (
@@ -85,13 +144,33 @@ function App() {
           </div>
         </div>
       </div>
-        {idConfirmModal && (
+        {(idConfirm != null && idConfirmModal) && (
             <ConfirmationModal
                 noButton='No'
                 yesButton='Yes'
-                message='Are you this person? ' 
-                onYes={() => setIdConfirmModal(false) }
-                onNo={() => setIdConfirmModal(false)}
+                message={'Are you ' + idConfirm["name"] + " from the cluster " + idConfirm["cluster_name"] + "?"}
+                onYes={() => {setIdConfirmModal(false); recordAttendance(idConfirm["student_id"]) } }
+                onNo={() => {setIdConfirmModal(false); setIdConfirm(null);} }
+            />
+        )}
+        {errorLog != null && (
+            <ErrorDialogModal
+                buttonText='Ok'
+                message='An error occured. Please check the error message below.' 
+                errorLog={errorLog}
+                onClick={() => setErrorLog(null) }
+            />
+        )}
+        {successModal && (
+            <DialogModal
+                buttonText='Ok'
+                message='Attendance recorded.' 
+                onClick={() => setSuccessModal(false) }
+            />
+        )}
+        {loadingModal && (
+            <LoadingModal
+                message="Recording attendance..."
             />
         )}
     </>

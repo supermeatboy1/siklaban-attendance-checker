@@ -4,7 +4,7 @@ import { createPortal } from "react-dom";
 const ConfirmationModal = ({ message, noButton, yesButton, onYes, onNo }) => {
   return createPortal(
     <div className="fixed inset-0 flex justify-center items-center bg-gray-800/40">
-      <div className="bg-amber-100 p-6 rounded-lg w-1/3 shadow-[-4px_4px_4px_#888888]"> 
+      <div className="bg-amber-100 p-6 rounded-lg w-4/5 shadow-[-4px_4px_4px_#888888]"> 
         <p className="text-2xl font-bold mb-4 text-center">{message}</p>
 
         <div className="flex flex-row justify-center">        
