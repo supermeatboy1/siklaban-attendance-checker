@@ -28,7 +28,7 @@ function App() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (useRFID && document.activeElement != idInputRef.current && idConfirm != null) {
+      if (useRFID && document.activeElement != idInputRef.current && !idConfirmModal) {
         console.log("Bringing back the focus...")
         idInputRef.current?.focus();
       }
