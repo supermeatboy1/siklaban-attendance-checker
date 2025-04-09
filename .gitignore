@@ -24,3 +24,5 @@ dist-ssr
 *.sw?
 *.sublime-project
 *.sublime-workspace
+*.env
+.env
